@@ -10,7 +10,7 @@ Before starting, ensure you have the following installed and configured:
 - **Ansible**: Latest stable version.
 - **AWS Account**: An active account with **AWS CLI** configured (`aws configure`) and sufficient credits (Free Tier eligible).
 
-## 🚀 Current Technical Setup
+## Current Technical Setup
 
 The following components are fully implemented and functional:
 
@@ -29,7 +29,7 @@ The following components are fully implemented and functional:
 - **Connectivity**: Configured to connect as the `ubuntu` user using the Terraform-generated private key.
 - **Status**: The setup is ready for playbook execution (Ping test functional).
 
-## 📂 Project Structure
+## Project Structure
 
 ```bash
 .
@@ -41,7 +41,7 @@ The following components are fully implemented and functional:
 └── README.md         # Project documentation
 ```
 
-## ⚙️ Usage Instructions
+## Usage Instructions
 
 ### Provisioning the Infrastructure
 
@@ -58,7 +58,7 @@ terraform apply
 ansible all -m ping -i ansible/hosts.yaml
 ```
 
-## ⚠️ Important Note
+## Important Note
 
 To avoid AWS charges, always decommission the resources when not in use:
 
