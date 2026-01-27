@@ -1,0 +1,5 @@
+app-server:
+  hosts: <ip-address>
+  vars:
+    ansible_user: ubuntu
+    ansible_ssh_private_key_file: /home/brian/.ssh/<aws_key_pair.generated_key.key_name>.pem

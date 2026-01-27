@@ -1,60 +1,68 @@
 # Infrastructure as Code: AWS EC2 Deployment
 
-This project aims to automate the provisioning and configuration of cloud infrastructure. Currently, it focuses on deploying a virtual machine on **AWS EC2** using **Terraform**. In the future, this repository will evolve to include configuration management with **Ansible** and other DevOps practices.
-
-## 🚀 Current Status: Phase 1 (Provisioning)
-
-In this initial phase, we use Terraform to:
-
-- Define a Provider (AWS).
-- Dynamically fetch the latest Ubuntu AMI from Canonical.
-- Provision an `EC2` instance within the **AWS Free Tier** limits.
+This project automates the provisioning of a cloud server on AWS and prepares it for configuration management. It follows a modular structure to separate infrastructure logic from configuration logic.
 
 ## 🛠️ Prerequisites
 
-- [Terraform](https://www.terraform.io/downloads.html) installed (v1.0.0+).
-- An active **AWS Account**.
-- AWS Credentials configured locally (via `aws configure` or environment variables).
+Before starting, ensure you have the following installed and configured:
+
+- **Terraform**: v1.14.0 or higher.
+- **Ansible**: Latest stable version.
+- **AWS Account**: An active account with **AWS CLI** configured (`aws configure`) and sufficient credits (Free Tier eligible).
+
+## 🚀 Current Technical Setup
+
+The following components are fully implemented and functional:
+
+### 1. Infrastructure (Terraform)
+
+- **Cloud Provider**: AWS (Region: `eu-west-3`).
+- **Compute**: One EC2 instance (`t3.micro`) running Ubuntu 24.04 LTS.
+- **Security**: A Security Group allowing inbound SSH traffic (port 22) and all outbound traffic.
+- **Access Management**:
+  - Automatic generation of a 4096-bit RSA key pair.
+  - Automatic storage of the private key (`.pem`) in the local `~/.ssh/` directory with secure permissions (`0600`).
+
+### 2. Configuration (Ansible)
+
+- **Inventory**: A YAML-based inventory located in `ansible/hosts.yaml`.
+- **Connectivity**: Configured to connect as the `ubuntu` user using the Terraform-generated private key.
+- **Status**: The setup is ready for playbook execution (Ping test functional).
 
 ## 📂 Project Structure
 
 ```bash
 .
-├── main.tf          # Terraform configuration (Provider, Data Sources, Resources)
-├── .gitignore       # Prevents sensitive files (tfstate) from being committed
-└── README.md        # Project documentation
+├── ansible/
+│   └── hosts.yaml    # Managed inventory with host IP and SSH path
+├── terraform/
+│   └── main.tf       # Infrastructure definitions (AWS, Keys, SG)
+├── .gitignore        # Ignores .tfstate and sensitive local keys
+└── README.md         # Project documentation
 ```
 
-## ⚙️ Quick Start
+## ⚙️ Usage Instructions
 
-1. **Initialize the workspace:**
+### Provisioning the Infrastructure
 
-   ```bash
-   terraform init
-   ```
+```bash
+cd terraform
+terraform init
+terraform apply
+```
 
-2. **Validate the syntax:**
+### Testing Connectivity
 
-   ```bash
-   terraform fmt
-   terraform validate
-   ```
+```bash
+# From the project root
+ansible all -m ping -i ansible/hosts.yaml
+```
 
-3. **Preview the infrastructure:**
+## ⚠️ Important Note
 
-   ```bash
-   terraform plan
-   ```
+To avoid AWS charges, always decommission the resources when not in use:
 
-4. **Deploy:**
-   ```bash
-   terraform apply
-   ```
-
-## 🛣️ Roadmap
-
-- [x] **Phase 1**: Infrastructure provisioning with Terraform (EC2).
-
-## ⚠️ Safety Note
-
-Always run `terraform destroy` when you are done with your tests to ensure no unexpected costs are incurred on your AWS account.
+```bash
+cd terraform
+terraform destroy
+```
