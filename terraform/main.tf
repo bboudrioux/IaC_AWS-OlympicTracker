@@ -61,6 +61,13 @@ resource "aws_security_group" "my_security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -86,9 +93,22 @@ resource "aws_key_pair" "generated_key" {
 }
 
 resource "local_sensitive_file" "pem_file" {
-  filename        = pathexpand("~/.ssh/aws_${aws_key_pair.generated_key.key_name}.pem")
+  filename        = pathexpand("~/.ssh/${aws_key_pair.generated_key.key_name}.pem")
   file_permission = "0600"
   content         = tls_private_key.my_ssh_key.private_key_pem
+}
+
+resource "local_file" "ansible_inventory" {
+  content = <<-EOT
+    app_server:
+      hosts:
+        ${aws_instance.app_server.public_ip}:
+      vars:
+        ansible_user: ubuntu
+        ansible_ssh_private_key_file: ${local_sensitive_file.pem_file.filename}
+        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+  EOT
+  filename = "../ansible/hosts.yml"
 }
 
 # --- OUTPUTS ---
