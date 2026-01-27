@@ -8,3 +8,10 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 .terragrunt-cache/
+.vscode/
+.idea/
+*.iml
+.DS_Store
+ansible.cfg
+*.retry
+ansible/secrets.yml
