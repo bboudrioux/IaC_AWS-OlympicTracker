@@ -1,38 +1,53 @@
-Role Name
-=========
+# Olympic Tracker App Role
 
-A brief description of the role goes here.
+Ce rôle déploie l'application **Olympic Participation Tracker** sous forme de conteneur Docker. Il gère l'authentification au registre GitLab, la récupération de l'image (pull) et le cycle de vie du conteneur.
 
-Requirements
-------------
+## Requirements
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- **Docker** : Le moteur Docker doit être installé sur l'hôte (géré par la dépendance `geerlingguy.docker`).
+- **Python SDK for Docker** : Requis pour les modules Ansible `docker_container` et `docker_login` (géré par `geerlingguy.pip`).
+- **Accès réseau** : L'instance doit pouvoir contacter `registry.gitlab.com`.
 
-Role Variables
---------------
+## Role Variables
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Les variables suivantes sont définies dans `defaults/main.yml` ou passées via `group_vars` :
 
-Dependencies
-------------
+| Variable             | Description                                | Par défaut                |
+| -------------------- | ------------------------------------------ | ------------------------- |
+| `app_image_name`     | Nom complet de l'image sur GitLab Registry | `registry.gitlab.com/...` |
+| `app_container_name` | Nom du conteneur Docker sur l'hôte         | `olympic-tracker`         |
+| `app_port_host`      | Port exposé sur la machine hôte            | `80`                      |
+| `app_port_container` | Port d'écoute interne du conteneur         | `80`                      |
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+**Variables Secrètes (Ansible Vault) :**
 
-Example Playbook
-----------------
+- `gitlab_user` : Identifiant pour la connexion au registre.
+- `gitlab_token` : Token d'accès personnel (PAT) GitLab.
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+## Dependencies
 
-    - hosts: servers
+Ce rôle dépend de deux rôles communautaires pour préparer l'environnement :
+
+1. **geerlingguy.pip** : Pour installer le package Python `docker`.
+2. **geerlingguy.docker** : Pour installer et configurer Docker Engine.
+
+## Example Playbook
+
+Voici comment intégrer ce rôle dans votre déploiement principal :
+
+    - hosts: all
+      become: yes
       roles:
-         - { role: username.rolename, x: 42 }
+         - role: app
+           vars:
+             app_port_host: 80
 
-License
--------
+## License
 
-BSD
+MIT
 
-Author Information
-------------------
+## Author Information
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Brian Boudrioux
+
+Ce rôle a été créé dans le cadre du projet Olympic Tracker pour automatiser le déploiement continu d'applications conteneurisées sur AWS.
