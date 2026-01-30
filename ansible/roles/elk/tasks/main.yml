@@ -1,0 +1,75 @@
+- name: Créer le réseau Docker ELK
+  docker_network:
+    name: elk_network
+
+- name: Configurer le noyau pour Elasticsearch (vm.max_map_count)
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: "262144"
+    state: present
+    reload: yes
+
+- name: Lancer le conteneur Elasticsearch
+  docker_container:
+    name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    state: started
+    restart_policy: always
+    networks:
+      - name: elk_network
+    env:
+      discovery.type: "single-node"
+      xpack.security.enabled: "false"
+      bootstrap.memory_lock: "false"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+
+- name: Lancer Logstash
+  docker_container:
+    name: logstash
+    image: docker.elastic.co/logstash/logstash:7.14.0
+    networks:
+      - name: elk_network
+    ports:
+      - "12201:12201/udp"
+    env:
+      LS_JAVA_OPTS: "-Xms256m -Xmx256m"
+    command: |
+      bash -c 'bin/logstash -e "
+      input { 
+        gelf { port => 12201 } 
+      }
+      filter {
+        grok {
+          match => { \"message\" => \"%{COMBINEDAPACHELOG}\" }
+        }
+        mutate {
+          convert => { \"response\" => \"integer\" }
+          convert => { \"bytes\" => \"integer\" }
+        }
+        geoip {
+          source => \"clientip\"
+        }
+      }
+      output {
+        elasticsearch { 
+          hosts => [\"http://elasticsearch:9200\"] 
+          index => \"access-logs-%{+YYYY.MM.dd}\" 
+        }
+      }"'
+
+- name: Lancer le conteneur Kibana
+  docker_container:
+    name: kibana
+    image: docker.elastic.co/kibana/kibana:7.14.0
+    state: started
+    restart_policy: always
+    networks:
+      - name: elk_network
+    env:
+      ELASTICSEARCH_URL: "http://elasticsearch:9200"
+    ports:
+      - "5601:5601"

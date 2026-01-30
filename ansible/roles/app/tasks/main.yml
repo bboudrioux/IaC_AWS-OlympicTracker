@@ -13,6 +13,10 @@
     published_ports:
       - "{{ app_published_port }}:{{ app_container_port }}"
     pull: yes
+    log_driver: gelf
+    log_options:
+      gelf-address: "udp://{{ hostvars[groups['elk_servers'][0]]['inventory_hostname'] }}:12201"
+      tag: "olympic-app"
   notify: "Confirm Deployment"
 
 - name: Remove unused Docker data (Cleanup)

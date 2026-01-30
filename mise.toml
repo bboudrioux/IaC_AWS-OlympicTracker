@@ -8,7 +8,7 @@ run = "cd terraform && terraform init"
 
 [tasks."infra:apply"]
 description = "Déploie l'infrastructure AWS"
-run = "cd terraform && terraform apply"
+run = "cd terraform && terraform apply -auto-approve"
 
 [tasks."infra:destroy"]
 description = "Détruit l'infrastructure AWS"

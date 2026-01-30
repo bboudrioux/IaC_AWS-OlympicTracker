@@ -5,16 +5,13 @@
     - name: Update apt cache (Debian/Ubuntu)
       apt:
         update_cache: yes
-      when: ansible_os_family == "Debian"
-
+      when: ansible_facts['os_family'] == "Debian"
     - name: Update dnf cache (Amazon Linux/RHEL)
       dnf:
         makecache: yes
-      when: ansible_os_family == "RedHat"
-
+      when: ansible_facts['os_family'] == "RedHat"
   vars_files:
     - secrets.yml
-
   roles:
     - app
 
@@ -23,3 +20,9 @@
   become: yes
   roles:
     - haproxy
+
+- name: Deploy ELK Stack
+  hosts: elk_servers
+  become: yes
+  roles:
+    - elk
