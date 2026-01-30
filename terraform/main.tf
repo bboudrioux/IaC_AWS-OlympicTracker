@@ -22,3 +22,22 @@ resource "aws_instance" "haproxy" {
     Name = "${var.project_name}-HAProxy"
   }
 }
+
+resource "aws_instance" "elk_server" {
+  ami           = aws_instance.haproxy.ami
+  instance_type = "t3.medium"
+
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+  }
+  
+  key_name      = aws_key_pair.generated_key.key_name
+  
+  vpc_security_group_ids = [aws_security_group.elk_sg.id]
+  subnet_id              = aws_instance.haproxy.subnet_id
+
+  tags = {
+    Name = "${var.project_name}-ELK"
+  }
+}
