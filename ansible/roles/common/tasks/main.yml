@@ -1,0 +1,15 @@
+- name: Sécuriser les connexions SSH
+  become: yes
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  loop:
+    - { regexp: "^PasswordAuthentication", line: "PasswordAuthentication no" }
+    - { regexp: "^PermitRootLogin", line: "PermitRootLogin prohibit-password" }
+    - {
+        regexp: "^ChallengeResponseAuthentication",
+        line: "ChallengeResponseAuthentication no",
+      }
+  notify: restart_ssh
