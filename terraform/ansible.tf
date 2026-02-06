@@ -1,6 +1,6 @@
 resource "local_file" "ansible_inventory" {
   content = <<-EOT
-  all:
+all:
   vars:
     ansible_python_interpreter: /usr/bin/python3
   children:

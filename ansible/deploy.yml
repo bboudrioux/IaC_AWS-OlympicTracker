@@ -1,3 +1,9 @@
+- name: Configuration de base et sécurité
+  hosts: all
+  become: true
+  roles:
+    - common
+
 - name: Deploy Olympic Tracker app
   hosts: app_servers
   become: yes
